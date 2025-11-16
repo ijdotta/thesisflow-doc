@@ -23,6 +23,8 @@
 \authorrunning{I. J. Dotta}
 \institute{Departamento de Ciencias e Ingenier\'ia de la Computaci\'on (DCIC)\\
 Universidad Nacional del Sur, Argentina\\
+Directores: Dr. Martín Larrea y Dra. María Luján Ganuza\\
+Codirector: Lic. Diego Sebastian Orbe Leiva\\
 \email{ij.dotta@gmail.com}}
 
 \begin{document}
@@ -205,6 +207,12 @@ El modelo de datos incluye entidades como \texttt{Project}, \texttt{Person}, \te
 
 Los servicios de negocio abstraen el acceso a datos y coordinan operaciones que involucran múltiples entidades, tales como la creación de un nuevo proyecto con sus relaciones, la importación de lotes desde archivos CSV o la construcción de agregados para analíticas.
 
+\subsection{Despliegue e infraestructura}
+
+En el entorno actual, el frontend de \emph{ThesisFlow} se despliega en Vercel, que realiza el proceso de construcción utilizando la configuración de Vite.js y sirve los archivos estáticos resultantes desde su red de distribución de contenido. El backend y la base de datos PostgreSQL se alojan en Render, donde el servicio backend se construye y ejecuta a partir de un \texttt{Dockerfile}, lo que permite reproducir localmente el mismo entorno de ejecución que en producción.
+
+Como línea de mejora, se considera deseable que a futuro la plataforma sea alojada en la infraestructura del propio DCIC, bajo un dominio institucional del tipo \texttt{*.cs.uns.edu.ar}, de modo de consolidar el control operativo, la soberanía de los datos y la integración con otros servicios de la Universidad.
+
 \subsection{Flujo de creación de proyectos}
 
 El flujo de creación de un proyecto refleja el proceso que sigue la secretaría para registrar un Trabajo Final aprobado. La Figura~\ref{fig:sequence} muestra un diagrama de secuencia simplificado.
@@ -290,6 +298,9 @@ Entre las posibles líneas de trabajo futuro se encuentran:
   \item Integrar almacenamiento de archivos dentro del sistema para reducir la dependencia de enlaces externos.
   \item Implementar estrategias de respaldo automático y procedimientos simplificados de restauración.
 \end{itemize}
+
+\subsubsection*{Agradecimientos}
+Agradezco especialmente a mis directores, Dr. Martín Larrea y Dra. María Luján Ganuza, y a mi codirector, Lic. Diego Sebastián Orbe Leiva, por su guía, dedicación y acompañamiento durante el desarrollo de este trabajo. Su orientación académica y técnica fue fundamental para la concreción de este proyecto.
 
 % --- Bibliografía ---
 \bibliographystyle{splncs04}
