@@ -168,14 +168,14 @@ La arquitectura de \emph{ThesisFlow} adopta una estructura de tres capas: fronte
 ]
 
 % Frontend (top)
-\node[box] (fe) at (0, 4) {%
+\node[box] (fe) at (0, 6) {%
   \textbf{Frontend}\\[3pt]
   React + TypeScript, SPA\\
   Vistas: Admin, Docentes, Público
 };
 
 % Backend (middle)
-\node[box] (be) at (0, 2) {%
+\node[box] (be) at (0, 3) {%
   \textbf{Backend}\\[3pt]
   Spring Boot + Kotlin\\
   REST API, Servicios, Auth
@@ -189,8 +189,8 @@ La arquitectura de \emph{ThesisFlow} adopta una estructura de tres capas: fronte
 };
 
 % Relaciones entre capas
-\draw[arrow] (fe) -- node[right, font=\tiny]{HTTP\\JSON} (be);
-\draw[arrow] (be) -- node[right, font=\tiny]{SQL\\ORM} (db);
+\draw[arrow] (fe) -- node[right, font=\tiny]{HTTP + JSON} (be);
+\draw[arrow] (be) -- node[right, font=\tiny]{SQL + ORM} (db);
 
 \end{tikzpicture}
 \caption{Arquitectura general de \emph{ThesisFlow}: tres capas principales y sus responsabilidades.}
