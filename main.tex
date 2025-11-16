@@ -10,10 +10,11 @@
 \usepackage{csquotes}
 \usepackage{amsmath}
 \usepackage{enumitem}
-\usepackage{listings}
 \usepackage{xcolor}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc}
 
 % --- Metadata ---
 \title{ThesisFlow: Plataforma Web para la Gestión y Visualización de Trabajos Finales en el DCIC}
@@ -27,172 +28,271 @@ Universidad Nacional del Sur, Argentina\\
 \begin{document}
 \maketitle
 
+% --- Abstract ---
 \begin{abstract}
-Este trabajo presenta \emph{ThesisFlow}, una plataforma web para la gestión y visualización de Trabajos Finales y Tesis de Grado del DCIC. El sistema integra en una única solución: (i) los flujos administrativos de carga y curado de información; (ii) un módulo de auto\-gestión para profesores; y (iii) un portal público de analíticas interactivas. Se describe la motivación y el contexto institucional, se analizan alternativas de solución, se especifican los objetivos perseguidos y se detalla la implementación a nivel de arquitectura, diseño e interfaces. A partir de la instancia desplegada se discuten usos concretos de la aplicación y se extraen conclusiones sobre su impacto en la transparencia y la toma de decisiones basada en datos. Finalmente, se identifican líneas de trabajo futuro para extender la plataforma e integrarla con otros sistemas institucionales.
+Este trabajo presenta \emph{ThesisFlow}, una plataforma web que centraliza la gestión y visualización de Trabajos Finales y Tesis de Grado del DCIC. El sistema integra en una única solución los flujos administrativos de carga y curado de información, un módulo de autogestión para docentes y un portal público de analíticas interactivas. Se describen la motivación y el contexto institucional, la exploración de soluciones y alternativas, los objetivos del proyecto y los aspectos centrales de la implementación a nivel de arquitectura, modelo de datos e interfaces. Finalmente, se discuten usos concretos de la aplicación, conclusiones sobre su impacto y líneas de trabajo futuro.
 \keywords{Sistemas de información académica \and Visualización de datos \and Ingeniería de software \and Aplicaciones web}
 \end{abstract}
 
 % --- 1. Motivación ---
-\section{Motivaci\'on}
+\section{Motivación}
 
-La gestión de Trabajos Finales y Tesis de Grado en el Departamento de Ciencias e Ingeniería de la Computación (DCIC) involucra a múltiples actores: secretaría, docentes, estudiantes y comunidad académica en general. Históricamente, la información asociada a estos proyectos se ha gestionado mediante herramientas heterogéneas (planillas, documentos aislados, repositorios parciales), lo que dificulta:
+La gestión de Trabajos Finales y Tesis de Grado en el Departamento de Ciencias e Ingeniería de la Computación (DCIC) involucra a secretaría, docentes, estudiantes y autoridades. Históricamente, la información asociada a estos proyectos se distribuyó en planillas, documentos aislados y actas del Consejo Departamental, lo que dificulta:
 
 \begin{itemize}
   \item la trazabilidad del ciclo de vida de cada trabajo;
   \item el análisis de tendencias temáticas y líneas de dirección;
   \item la obtención de estadísticas confiables para la planificación académica;
-  \item la transparencia institucional sobre la producción del departamento.
+  \item la transparencia institucional respecto de la producción del departamento.
 \end{itemize}
 
-\subsection*{Estado actual y necesidad de sistematización}
-Tradicionalmente, el DCIC no llevaba un registro centralizado ni detallado de los Trabajos Finales. Año a año, al preparar los informes de producción académica, se revisaban manualmente las actas del Consejo Departamental para reconstruir cuántos proyectos se habían aprobado. Este método es laborioso, propenso a omisiones y dificulta cualquier análisis longitudinal o temático.
+\subsection*{Estado de la cuestión}
 
-En los últimos años se inició una recopilación más detallada de información (título, directores, fechas, temática, alumnos), pero aún dispersa y sin un sistema que permita explotar estos datos de forma eficiente.
+Tradicionalmente, al preparar la producción académica anual se revisan manualmente las actas aprobadas durante el período correspondiente, obteniendo principalmente conteos agregados de Trabajos Finales. En años recientes se comenzó a recopilar información más detallada (título, fechas, docentes, temática, alumnos), pero sin un sistema que permita explotarla de manera estructurada ni ofrecer vistas unificadas a los distintos actores.
 
-\subsection*{Problema secundario: dificultades para los estudiantes}
-Además de la necesidad institucional, existe una problemática estudiantil frecuente al iniciar el Trabajo Final:
+\subsection*{Perspectiva de los estudiantes}
+
+Desde la óptica de los alumnos, el inicio del Trabajo Final suele estar acompañado de incertidumbre. Son frecuentes situaciones como:
 
 \begin{itemize}
-  \item Muchos estudiantes no saben qué constituye un proyecto final típico en cuanto a alcance, tipo de producto o complejidad.
-  \item Otros tienen ideas iniciales, pero no saben si son viables o qué profesor trabaja en áreas relacionadas.
+  \item no tener claro qué tipo de producto o alcance se espera de un Trabajo Final;
+  \item contar con una idea preliminar pero no saber si es viable o qué docente podría dirigirla;
+  \item desconocer qué temas se han trabajado recientemente en el departamento.
 \end{itemize}
 
-Una plataforma que permita visualizar proyectos históricos, sus temas y docentes involucrados facilita:
+Una plataforma integral que brinde acceso a proyectos históricos, sus temas y docentes asociados permite:
 
 \begin{itemize}
-  \item inspirarse revisando documentación de proyectos previos;
-  \item entender cuáles fueron los temas más frecuentes en los últimos años;
-  \item partir de un tema de interés y encontrar docentes relacionados;
-  \item partir de un docente y explorar sus líneas de trabajo.
+  \item explorar Trabajos Finales previos y su documentación para inspirarse;
+  \item identificar tendencias temáticas a lo largo del tiempo;
+  \item partir de un tema de interés y localizar qué docentes trabajan en esa área;
+  \item partir de un docente y explorar los temas en los que ha dirigido trabajos.
 \end{itemize}
 
-\subsection*{Síntesis}
-En este contexto, \emph{ThesisFlow} surge como una herramienta integral que mejora la transparencia, reduce esfuerzos administrativos y fortalece la toma de decisiones informada tanto para estudiantes como para autoridades y docentes.
+En este contexto, \emph{ThesisFlow} surge como una herramienta para unificar la gestión, facilitar el acceso a la información y habilitar analíticas que apoyen la toma de decisiones de estudiantes y autoridades.
 
 % --- 2. Exploración de soluciones ---
-\section{Exploraci\'on de soluciones}
+\section{Exploración de soluciones}
 
-Previo al diseño del sistema se analizaron diversas plataformas existentes:
-
-\begin{itemize}
-  \item Repositorios institucionales tales como el Repositorio UBA \url{https://repositoriouba.sisbi.uba.ar/gsdl/cgi-bin/library.cgi}
-  \item Repositorio Digital de la UNS \url{https://repositoriodigital.uns.edu.ar/}
-  \item Plataformas de gestión académica de uso interno universitario.
-  \item Herramientas de enseñanza como Moodle con módulos opcionales.
-  \item Soluciones basadas en hojas de cálculo o tableros manuales.
-\end{itemize}
-
-Estos repositorios suelen cubrir únicamente la difusión del documento final, pero no ofrecen:
+Previo al diseño de la plataforma se revisaron soluciones existentes vinculadas a la gestión y difusión de Trabajos Finales y Tesis. Entre ellas se consideraron:
 
 \begin{itemize}
-  \item análisis ni visualización de datos;
-  \item filtrado avanzado ni exploración temática;
-  \item funcionalidades internas para la secretaría o docentes;
-  \item trazabilidad en el ciclo de vida del proyecto.
+  \item Repositorio UBA: \url{https://repositoriouba.sisbi.uba.ar/gsdl/cgi-bin/library.cgi}
+  \item Repositorio Digital de la UNS: \url{https://repositoriodigital.uns.edu.ar/}
 \end{itemize}
 
-Por lo tanto, si bien constituyen herramientas valiosas de archivo institucional, no abordan la problemática integral que el DCIC requiere.
+Estos repositorios permiten almacenar y consultar trabajos completos, junto con metadatos básicos sobre autores, directores y fecha. Sin embargo:
+
+\begin{itemize}
+  \item no incorporan flujos administrativos específicos del DCIC (por ejemplo, carga desde actas del Consejo);
+  \item no brindan analíticas interactivas sobre temas, carreras o redes de colaboración;
+  \item no ofrecen vistas diferenciadas para secretaría, docentes y estudiantes.
+\end{itemize}
+
+También se analizaron sistemas de gestión académica y plataformas de e-learning con módulos de Trabajos Finales. En general, se observó que cubren parcialmente el problema, con escasa capacidad de adaptación al dominio local y limitadas herramientas de visualización de datos.
 
 % --- 3. Alternativas ---
 \section{Alternativas}
 
-Tres alternativas principales fueron consideradas:
+A partir de la exploración previa se identificaron tres alternativas principales:
 
-\subsection*{1. Mantener el sistema actual}
-Esta opción fue descartada por:
+\subsection*{1. Mantener el esquema actual}
 
-\begin{itemize}
-  \item \textbf{Dificultad de acceso y difusión}: compartir una planilla no es equivalente a una web navegable y filtrable.
-  \item \textbf{Riesgos de integridad}: las planillas no garantizan consistencia en formatos, categorías ni valores.
-  \item \textbf{Nula capacidad analítica}: generar gráficos o vistas complejas requiere procesos manuales e irrepetibles.
-  \item \textbf{Escalabilidad limitada}: a medida que crecen los datos, aumenta la complejidad de procesarlos manualmente.
-  \item \textbf{Poca extensibilidad}: agregar nuevas funcionalidades implica rehacer la herramienta.
-\end{itemize}
-
-\subsection*{2. Adoptar una plataforma existente}
-Poco viable dadas las limitaciones típicas:
+La primera opción consistía en continuar utilizando planillas compartidas y documentos dispersos. Esta alternativa se descartó debido a:
 
 \begin{itemize}
-  \item modelos de datos rígidos;
-  \item poca capacidad de integración con flujos administrativos locales;
-  \item escaso soporte para visualizaciones interactivas.
+  \item dificultades para garantizar integridad y uniformidad de los datos;
+  \item escasa capacidad de visualización avanzada y analíticas complejas;
+  \item poca escalabilidad a medida que crece el volumen de Trabajos Finales;
+  \item limitaciones para extender funcionalidades o incorporar nuevos actores.
 \end{itemize}
 
-\subsection*{3. Desarrollo propio}
-Elegida como solución final, permite:
+\subsection*{2. Adoptar un sistema externo}
+
+La segunda alternativa era adaptar un sistema existente (repositorio institucional, sistema académico o plataforma de terceros). Si bien podría reducir esfuerzo inicial, presenta desventajas:
 
 \begin{itemize}
-  \item control total del diseño y reglas de negocio;
-  \item optimización del análisis de datos;
-  \item extensibilidad futura (nuevas carreras, posgrado, nuevos módulos);
-  \item un modelo de datos adaptado al DCIC.
+  \item menor flexibilidad para adaptar el modelo de datos al DCIC;
+  \item dependencia de un proveedor externo para la evolución del sistema;
+  \item capacidades analíticas y de personalización acotadas.
 \end{itemize}
 
-% --- 4. Objetivos ---
-\section{Especificaci\'on de objetivos}
+\subsection*{3. Desarrollar un sistema propio}
 
-(Se mantiene igual — omito aquí por brevedad, pero lo mantendré íntegro en la versión final.)
+La tercera opción, finalmente adoptada, es desarrollar una solución propia, modular y extensible. Esta alternativa supone un mayor esfuerzo inicial, pero ofrece:
+
+\begin{itemize}
+  \item control total sobre el modelo de datos y las reglas de negocio;
+  \item optimización específica para consultas y analíticas relevantes;
+  \item un diseño preparado para extenderse a nuevas carreras o módulos (por ejemplo, posgrado);
+  \item posibilidad de incorporar integración progresiva con otros sistemas institucionales.
+\end{itemize}
+
+% --- 4. Especificación de objetivos ---
+\section{Especificación de objetivos}
+
+\subsection{Objetivo general}
+
+Diseñar e implementar una plataforma web integral para la gestión, el seguimiento y la visualización de Trabajos Finales y Tesis de Grado del DCIC, que sirva como fuente confiable de información para secretaría, docentes y comunidad académica.
+
+\subsection{Objetivos específicos}
+
+\begin{itemize}
+  \item Centralizar la información de Trabajos Finales en una base de datos estructurada y consistente.
+  \item Proveer interfaces diferenciadas para secretaría, docentes y público general.
+  \item Ofrecer analíticas interactivas sobre la producción del departamento.
+  \item Incorporar mecanismos de autenticación y control de acceso acordes a cada perfil.
+  \item Facilitar tareas de respaldo, restauración y auditoría de datos.
+\end{itemize}
 
 % --- 5. Implementación ---
-\section{Implementaci\'on}
+\section{Implementación}
 
-\subsection{Arquitectura}
-(Se mantiene lo que ya tenías, expandido con detalles del documento de analytics.)
+\subsection{Arquitectura general}
 
-\subsection{Servicios principales}
+La arquitectura de \emph{ThesisFlow} adopta una estructura de tres capas: frontend, backend y base de datos. La Figura~\ref{fig:architecture} ilustra los componentes principales y sus interacciones.
 
-\paragraph{Servicio de Analytics.}
-El \texttt{AnalyticsService} implementa:
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  box/.style={
+    rectangle,
+    draw,
+    rounded corners,
+    align=center,
+    minimum width=5cm,
+    minimum height=1.8cm,
+    font=\small
+  },
+  arrow/.style={-Latex, line width=1pt}
+]
+
+% Frontend (top)
+\node[box] (fe) at (0, 4) {%
+  \textbf{Frontend}\\[3pt]
+  React + TypeScript, SPA\\
+  Vistas: Admin, Docentes, Público
+};
+
+% Backend (middle)
+\node[box] (be) at (0, 2) {%
+  \textbf{Backend}\\[3pt]
+  Spring Boot + Kotlin\\
+  REST API, Servicios, Auth
+};
+
+% Base de datos (bottom)
+\node[box] (db) at (0, 0) {%
+  \textbf{Base de datos}\\[3pt]
+  PostgreSQL\\
+  projects, people, careers, domains, tags
+};
+
+% Relaciones entre capas
+\draw[arrow] (fe) -- node[right, font=\tiny]{HTTP\\JSON} (be);
+\draw[arrow] (be) -- node[right, font=\tiny]{SQL\\ORM} (db);
+
+\end{tikzpicture}
+\caption{Arquitectura general de \emph{ThesisFlow}: tres capas principales y sus responsabilidades.}
+\label{fig:architecture}
+\end{figure}
+
+El backend expone endpoints REST para operaciones administrativas, vistas públicas y analíticas. Los servicios encapsulan la lógica de negocio (gestión de proyectos, personas, carreras, importación y respaldos). El frontend, implementado como SPA, organiza vistas por rol y utiliza componentes reutilizables para formularios, tablas y dashboards.
+
+\subsection{Modelo de datos y servicios}
+
+El modelo de datos incluye entidades como \texttt{Project}, \texttt{Person}, \texttt{Career}, \texttt{Domain} y \texttt{Tag}, junto con tablas de unión para representar relaciones muchos-a-muchos (por ejemplo, proyectos–docentes y proyectos–etiquetas). Internamente se utilizan claves enteras, mientras que hacia el exterior se exponen UUIDs para preservar estabilidad y privacidad en los identificadores.
+
+Los servicios de negocio abstraen el acceso a datos y coordinan operaciones que involucran múltiples entidades, tales como la creación de un nuevo proyecto con sus relaciones, la importación de lotes desde archivos CSV o la construcción de agregados para analíticas.
+
+\subsection{Flujo de creación de proyectos}
+
+El flujo de creación de un proyecto refleja el proceso que sigue la secretaría para registrar un Trabajo Final aprobado. La Figura~\ref{fig:sequence} muestra un diagrama de secuencia simplificado.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  font=\small,
+  lifeline/.style={rectangle, draw, minimum width=2.7cm, minimum height=0.9cm, align=center},
+  flow/.style={-Latex, line width=0.8pt},
+  x=2.9cm,
+  y=1cm
+]
+
+% Lifeline headers
+\node[lifeline] (admin) at (0,0) {Secretaría};
+\node[lifeline] (fe) at (1,0) {Frontend};
+\node[lifeline] (be) at (2,0) {Backend};
+\node[lifeline] (dbs) at (3,0) {Base de datos};
+
+% Lifeline dashed
+\draw[dashed] (admin.south) -- ++(0,-5.4);
+\draw[dashed] (fe.south) -- ++(0,-5.4);
+\draw[dashed] (be.south) -- ++(0,-5.4);
+\draw[dashed] (dbs.south) -- ++(0,-5.4);
+
+% Messages (explicit vertical levels)
+\draw[flow] ($(admin.south)+(0,-0.9)$) -- node[above]{1. Completa formulario} ($(fe.south)+(0,-0.9)$);
+\draw[flow] ($(fe.south)+(0,-1.8)$) -- node[above]{2. \texttt{POST /projects}} ($(be.south)+(0,-1.8)$);
+\draw[flow] ($(be.south)+(0,-2.7)$) -- node[above]{3. Validar y persistir} ($(dbs.south)+(0,-2.7)$);
+\draw[flow] ($(dbs.south)+(0,-3.6)$) -- node[above]{4. ID + UUID} ($(be.south)+(0,-3.6)$);
+\draw[flow] ($(be.south)+(0,-4.5)$) -- node[above]{5. Respuesta OK} ($(fe.south)+(0,-4.5)$);
+\draw[flow] ($(fe.south)+(0,-5.4)$) -- node[above]{6. Confirmación visual} ($(admin.south)+(0,-5.4)$);
+
+\end{tikzpicture}
+
+\caption{Flujo simplificado de creación de un proyecto en \emph{ThesisFlow}.}
+\label{fig:sequence}
+\end{figure}
+
+Este flujo asegura que los datos ingresados se validen en el backend, que se creen las relaciones necesarias en la base de datos y que el nuevo proyecto quede disponible inmediatamente para las interfaces de consulta y analíticas.
+
+% --- 6. Usos de la app ---
+\section{Usos de la aplicación}
+
+\emph{ThesisFlow} se utiliza en distintos escenarios por actores con necesidades diversas:
 
 \begin{itemize}
-  \item línea de tiempo de proyectos por año y profesor,
-  \item mapa de calor de temas,
-  \item red de colaboración entre docentes,
-  \item estadísticas por carrera,
-  \item agregación por dominios de aplicación.
+  \item \textbf{Secretaría}: registra Trabajos Finales aprobados, actualiza metadatos y genera listados consolidados.
+  \item \textbf{Docentes}: consultan los proyectos en los que participan como directores o co-directores y verifican la información publicada.
+  \item \textbf{Público general}: explora la producción del departamento mediante filtros y visualizaciones interactivas.
 \end{itemize}
 
-Cada endpoint expone datos listos para visualización, computados mediante consultas optimizadas y estructuras en memoria.
+\subsection*{Ejemplo de uso por estudiantes}
 
-\paragraph{Autenticación y Login.}
-El sistema combina dos métodos:
-
-\begin{itemize}
-  \item \textbf{Administradores}: login clásico con usuario y contraseña.
-  \item \textbf{Docentes}: autenticación por \emph{magic link} enviado por email, generando un JWT temporal.
-\end{itemize}
-
-Esto elimina la necesidad de gestionar contraseñas para todos los profesores y reduce fricción.
-
-\paragraph{Modelo de datos.}
-El modelo incluye:
-
-\begin{itemize}
-  \item \texttt{Project}, \texttt{Person}, \texttt{Career}, \texttt{Tag}, \texttt{Domain}.
-  \item Relaciones: un proyecto puede tener múltiples docentes y múltiples etiquetas.
-  \item Uso de UUIDs para exposición pública.
-\end{itemize}
-
-(… continuaré en la versión completa …)
-
-% --- 6. Usos ---
-(Dejar igual + completar después.)
+Un estudiante próximo a iniciar su Trabajo Final puede acceder al portal público, filtrar por carrera y temática (por ejemplo, sistemas distribuidos) y visualizar la evolución de proyectos en esa área. A partir de allí, identifica qué docentes dirigen más trabajos relacionados y revisa títulos y resúmenes de proyectos previos, obteniendo insumos concretos para formular una propuesta viable y ubicar un potencial director.
 
 % --- 7. Conclusiones ---
-(Dejar igual.)
+\section{Conclusiones}
+
+El desarrollo de \emph{ThesisFlow} dotó al DCIC de una herramienta específica para la gestión y visualización de Trabajos Finales y Tesis de Grado. La plataforma:
+
+\begin{itemize}
+  \item reduce la fragmentación de la información y la dependencia de planillas dispersas;
+  \item mejora la accesibilidad y la transparencia de los datos académicos;
+  \item habilita nuevas formas de análisis sobre la producción del departamento;
+  \item ofrece soporte concreto a la toma de decisiones de estudiantes, docentes y autoridades.
+\end{itemize}
+
+Desde la perspectiva de ingeniería de software, el sistema constituye un caso de estudio de diseño e implementación de una aplicación web modular, con separación clara de responsabilidades, API REST y visualización de datos aplicada a un problema académico real.
 
 % --- 8. Trabajo a futuro ---
 \section{Trabajo a futuro}
 
+Entre las posibles líneas de trabajo futuro se encuentran:
+
 \begin{itemize}
-  \item Implementar mecanismos de \textbf{caché de vistas analíticas} para evitar recomputación costosa.
-  \item Incorporar una \textbf{base NoSQL} para almacenar resultados preprocesados (filtros por docente, años, temas).
-  \item Añadir \textbf{audit trails}: historial de cambios, diffs, timestamps y usuarios responsables.
-  \item Escalar el sistema para incluir \textbf{trabajos de posgrado}.
-  \item Extender la plataforma a \textbf{otros departamentos} de la Universidad.
-  \item Permitir que los estudiantes agreguen \textbf{recursos y documentación} de sus propios trabajos.
-  \item Incorporar \textbf{almacenamiento de archivos} interno para no depender solo de enlaces externos.
-  \item Implementar \textbf{backups automáticos} programados.
+  \item Optimizar las analíticas mediante caching, vistas materializadas y/o almacenamiento auxiliar para resultados preprocesados.
+  \item Extender la cobertura a Trabajos Finales de posgrado y a otros departamentos de la Universidad.
+  \item Integrar la plataforma con sistemas institucionales existentes (gestión académica, repositorios digitales).
+  \item Incorporar mecanismos de auditoría detallada (historial de cambios, diffs, trazabilidad de usuarios).
+  \item Permitir que los alumnos suban recursos asociados a sus trabajos (código, datasets, documentación complementaria).
+  \item Integrar almacenamiento de archivos dentro del sistema para reducir la dependencia de enlaces externos.
+  \item Implementar estrategias de respaldo automático y procedimientos simplificados de restauración.
 \end{itemize}
+
+% --- Bibliografía ---
+\bibliographystyle{splncs04}
+\bibliography{references}
 
 \end{document}
