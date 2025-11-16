@@ -16,123 +16,181 @@
 \usepackage{subcaption}
 
 % --- Metadata ---
-\title{ThesisFlow: A Web Platform for Managing and Visualizing Undergraduate Theses at DCIC}
+\title{ThesisFlow: Plataforma Web para la Gestión y Visualización de Trabajos Finales en el DCIC}
 \titlerunning{ThesisFlow}
 \author{Ignacio Joaqu\'in Dotta}
 \authorrunning{I. J. Dotta}
-\institute{Departamento de Ciencias e Ingenier\'ia de la Computaci\'on (DCIC)\\ Universidad Nacional del Sur, Argentina\\ \email{ij.dotta@gmail.com}}
+\institute{Departamento de Ciencias e Ingenier\'ia de la Computaci\'on (DCIC)\\
+Universidad Nacional del Sur, Argentina\\
+\email{ij.dotta@gmail.com}}
 
-% --- Abstract & Keywords ---
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This paper presents \emph{ThesisFlow}, a web platform that digitizes the lifecycle of final projects and theses at the DCIC. The system integrates administrative workflows, professor self-service, and public analytics into a single solution. We describe the problem context motivating the system, the architecture and implementation (Spring Boot~+~Kotlin, React~+~TypeScript, PostgreSQL), the data and control flows (authentication, data ingestion and curation, analytics pipelines, and backup/restore), and the end-user interfaces. Using the live deployment, we analyze real data to uncover trends about topics, supervision, and collaboration. Results show improved data accessibility, transparency, and exploratory insights for academic decision-making. We discuss limitations (e.g., analytics scalability, testing gaps) and propose future work to extend analytics efficiency, authorization granularity, and interoperability with institutional systems.
-\keywords{Academic information systems \and Data visualization \and Software engineering \and Web applications}
+Este trabajo presenta \emph{ThesisFlow}, una plataforma web para la gestión y visualización de Trabajos Finales y Tesis de Grado del DCIC. El sistema integra en una única solución: (i) los flujos administrativos de carga y curado de información; (ii) un módulo de auto\-gestión para profesores; y (iii) un portal público de analíticas interactivas. Se describe la motivación y el contexto institucional, se analizan alternativas de solución, se especifican los objetivos perseguidos y se detalla la implementación a nivel de arquitectura, diseño e interfaces. A partir de la instancia desplegada se discuten usos concretos de la aplicación y se extraen conclusiones sobre su impacto en la transparencia y la toma de decisiones basada en datos. Finalmente, se identifican líneas de trabajo futuro para extender la plataforma e integrarla con otros sistemas institucionales.
+\keywords{Sistemas de información académica \and Visualización de datos \and Ingeniería de software \and Aplicaciones web}
 \end{abstract}
 
-% --- 1. Introduction ---
-\section{Introduction}
-Universities require trustworthy and accessible records of academic production to support administration, transparency, and strategic planning. At the DCIC, the management of undergraduate final projects and theses historically involved fragmented tools and manual processes, limiting visibility into trends (topics, supervision, careers) and complicating day-to-day operations. \emph{ThesisFlow} addresses these issues with an integrated platform that (i) streamlines the registration and curation of projects; (ii) offers professors a self-service view to maintain their projects; and (iii) provides a public analytics portal to explore the department's outputs.
+% --- 1. Motivación ---
+\section{Motivaci\'on}
+La gestión de Trabajos Finales y Tesis de Grado en el Departamento de Ciencias e Ingeniería de la Computación (DCIC) involucra a múltiples actores: secretaría, docentes, estudiantes y comunidad académica en general. Históricamente, la información asociada a estos proyectos se ha gestionado mediante herramientas heterogéneas (planillas, documentos aislados, sistemas parciales), lo que dificulta:
 
-\paragraph{Objectives.} The project aims to design and develop a comprehensive web system for the management, follow-up, and visualization of final projects and theses, delivering clear value for administrative staff, professors, and the broader community.
+\begin{itemize}
+  \item la trazabilidad del ciclo de vida de cada trabajo;
+  \item el análisis de tendencias temáticas y de direcciones;
+  \item la obtención de estadísticas confiables para la planificación académica; y
+  \item la transparencia hacia la comunidad sobre la producción del departamento.
+\end{itemize}
 
-\paragraph{Contributions.} The paper contributes: (1) a domain-driven, production-ready architecture and implementation; (2) a set of analytics visualizations (timeline, topic heatmap, collaboration network, and career statistics); (3) an evaluation based on the live instance and dataset; and (4) an open roadmap grounded in observed limitations and user feedback.
+En este contexto, \emph{ThesisFlow} surge como una propuesta para centralizar la información, modernizar los procesos administrativos y habilitar un acceso más simple y estructurado a los datos históricos de Trabajos Finales y Tesis, tanto para usuarios internos como externos al DCIC.
 
-\paragraph{Paper structure.} Section~\ref{sec:related} reviews related work. Section~\ref{sec:proposal} details requirements, architecture, and interfaces. Section~\ref{sec:results} reports results and discoveries from live analytics. Section~\ref{sec:discussion} discusses impact and limitations. Section~\ref{sec:conclusions} concludes and outlines future work.
+[TODO: Agregar métricas o ejemplos concretos del estado previo, si se dispone de ellos.]
 
-% --- 2. Related Work / State of the Art ---
-\section{Related Work}\label{sec:related}
-We review academic project management systems and analytics portals, highlighting three gaps our system addresses: (1) alignment between administrative workflows and public analytics, (2) professor-centric self-service without compromising data integrity, and (3) a minimal deployment footprint enabling departmental ownership.
+% --- 2. Exploración de soluciones ---
+\section{Exploraci\'on de soluciones}
+Previo al diseño de la solución propuesta se realizó una exploración de sistemas y enfoques ya existentes para la gestión académica y la visualización de datos:
 
-% (Optionally enumerate representative systems/tools and discuss their fit; keep citations in your .bib.)
+\begin{itemize}
+  \item Sistemas institucionales de gestión académica (por ejemplo, plataformas administrativas y repositorios digitales de tesis).
+  \item Plataformas de e-learning y gestión de cursos (como Moodle), con módulos adicionales para trabajos finales.
+  \item Soluciones ad-hoc basadas en hojas de cálculo y tableros de visualización externos.
+  \item Portales públicos de tesis de otras universidades, que ponen el foco principalmente en la difusión, con capacidades limitadas de gestión interna.
+\end{itemize}
 
-% --- 3. System Proposal ---
-\section{System Proposal}\label{sec:proposal}
-\subsection{Requirements}
-\textbf{Functional.} Manage projects, people (students/professors), careers, tags/domains; curate and import approved proposals (CSV); provide a public analytics portal (filters, drill-down); support professor logins and project ownership; enable backup/restore.
+En general, se observó que estas alternativas cubren parcialmente el problema: o bien se centran en la gestión interna pero sin visualizaciones públicas integradas, o se orientan a la difusión sin contemplar los flujos administrativos específicos del DCIC.
 
-\textbf{Non-functional.} Security (JWT, role-based access), maintainability (modular layering, typed DTOs), scalability (DB-centric aggregation as future work), usability/accessibility (responsive UI), and operational reliability (health checks, containerized deployment).
+[TODO: Referenciar sistemas concretos y, en lo posible, incluir citas bibliográficas o institucionales.]
 
-\subsection{Architecture and Implementation}
-\subsubsection{High-Level Architecture}
-ThesisFlow follows a three-tier architecture with clear boundaries between backend, frontend, and database. Infrastructure is containerized for reproducible deployments.
+% --- 3. Alternativas ---
+\section{Alternativas}
+A partir de la exploración previa se analizaron distintas alternativas de solución:
 
-\subsubsection{Backend (Spring Boot + Kotlin)}
-The backend exposes REST APIs for administrative and public endpoints, enforces authentication and authorization, implements the analytics pipeline, and orchestrates bulk import and backups. Key components include: \texttt{AnalyticsService} (in-memory aggregations for timelines, heatmaps, networks, and dashboards), repositories and services for core entities, and backup/restore services (table export/import with dependency order).
+\begin{enumerate}
+  \item \textbf{Mantener el esquema actual con herramientas genéricas.}  
+  Esto incluiría continuar utilizando planillas y documentos, complementados con tableros manuales. Si bien la inversión inicial es baja, los costos de mantenimiento y la propensión a errores humanos se mantienen elevados.
 
-\subsubsection{Frontend (React + TypeScript)}
-The SPA provides an admin console and a public analytics portal. It uses React Query for data fetching/caching, a consistent UI library for tables and forms, and ECharts/Recharts/vis-network for visualizations. Public endpoints back the analytics portal; authenticated routes power admin workflows.
+  \item \textbf{Adoptar una plataforma institucional o de terceros.}  
+  Adaptar un sistema existente podría reducir esfuerzo de desarrollo, pero suele implicar restricciones fuertes en el modelo de datos y en la forma de exponer estadísticas específicas del DCIC.
 
-\subsubsection{Database (PostgreSQL + Flyway)}
-A normalized schema stores projects, participants, careers, tags, and application domains. Integer primary keys support relations; externally-exposed UUIDs preserve stable identifiers. Schema migrations are tracked with Flyway.
+  \item \textbf{Desarrollar un sistema propio, modular y extensible.}  
+  Esta opción requiere mayor esfuerzo inicial, pero permite diseñar una solución alineada con las necesidades del departamento, controlando la evolución del sistema y su integración con otras herramientas.
+\end{enumerate}
 
-\subsubsection{Authentication and Authorization}
-Admins log in with credentials; professors authenticate via magic links that issue JWTs. Authorization checks ensure professors can only access their projects. Public analytics are readable without authentication.
+El proyecto se orienta por la tercera alternativa, priorizando la alineación con los requerimientos locales, la transparencia en el tratamiento de datos y la posibilidad de extender el sistema en futuras iteraciones.
 
-\subsubsection{Data and Control Flow}
-Data originates from CSV imports or manual creation; public endpoints expose curated subsets for analytics. The analytics pipeline performs aggregations and joins on repository queries; backup services export/import JSON snapshots.
+% --- 4. Especificación de objetivos ---
+\section{Especificaci\'on de objetivos}
 
-\subsection{Interfaces}
-\subsubsection{Administrative Interfaces}
-Tables to list, filter, create, and edit projects, people, careers, domains, and tags. Import views support CSV uploads with validation, row-level statuses, and summaries. Backup manager provides stepwise restore with safety checks.
+\subsection{Objetivo general}
+Diseñar e implementar una plataforma web integral para la gestión, el seguimiento y la visualización de Trabajos Finales y Tesis de Grado del DCIC, que sirva como fuente confiable de información para la gestión interna, los docentes y la comunidad académica en general.
 
-\subsubsection{Professor Self-Service}
-Professors view and filter their own projects; the system constrains results by professor identity to ensure ownership and privacy.
+\subsection{Objetivos específicos}
+\begin{itemize}
+  \item Centralizar la información de proyectos en una base de datos estructurada y consistente.
+  \item Proveer interfaces de administración para la carga, edición y curado de Trabajos Finales y Tesis.
+  \item Ofrecer un módulo de auto-gestión para profesores, acotado a los proyectos bajo su dirección.
+  \item Desarrollar un portal público de analíticas interactivas sobre la producción académica del departamento.
+  \item Incorporar mecanismos de respaldo y restauración de datos.
+  \item Diseñar la arquitectura de forma modular y escalable, facilitando su evolución.
+\end{itemize}
 
-\subsubsection{Public Analytics Portal}
-We present four visualizations: (i) timeline of projects per professor per year; (ii) heatmap of topics (tags) over time; (iii) professor collaboration network where node size reflects activity and edge width reflects co-supervision frequency; and (iv) career-by-year statistics with intensity shading. Each view shares filter controls (career, professor, date range, topic) and complementary summary cards (counts, percentages).
+[TODO: Ajustar y completar los objetivos específicos de acuerdo al plan aprobado por el DCIC.]
 
-% --- 4. Results and Discoveries ---
-\section{Results and Discoveries}\label{sec:results}
-We evaluate ThesisFlow using the live instance and dataset. All figures in this section are derived from production analytics endpoints at the time of writing.
+% --- 5. Implementación ---
+\section{Implementaci\'on}
+En esta sección se describe la implementación de \emph{ThesisFlow} en términos de arquitectura, diseño y su alineación con los objetivos definidos.
 
-\subsection{Dataset Overview}
-We report the number of projects, unique professors, students, application domains, and topics (tags), and describe the distribution across careers and years.
+\subsection{Arquitectura}
+La solución adopta una arquitectura de tres capas, con una separación clara entre:
 
-\subsection{Trends Over Time}
-The timeline shows the evolution of projects per professor per year. We highlight peaks and sustained supervision activity, and discuss whether topic diversity correlates with supervision volume.
+\begin{itemize}
+  \item \textbf{Backend}: desarrollado en Spring Boot (Java/Kotlin), expone una API REST para operaciones administrativas, consultas públicas y analíticas. Gestiona autenticación, autorización y lógica de negocio.
+  \item \textbf{Frontend}: implementado como una Single Page Application (SPA) en React + TypeScript, con vistas diferenciadas para administración, docentes y público general.
+  \item \textbf{Base de datos}: basada en PostgreSQL, con un esquema normalizado que modela proyectos, personas (estudiantes y profesores), carreras, dominios de aplicación y etiquetas temáticas, entre otras entidades.
+\end{itemize}
 
-\subsection{Topic Popularity}
-The heatmap reveals growth or decline in certain topics (e.g., AI, data science, systems). We identify emerging areas and long-term staples of the curriculum.
+La infraestructura se despliega en contenedores, lo que permite reproducir entornos y simplifica la operación del sistema.
 
-\subsection{Collaboration Network}
-The professor network uncovers co-supervision communities. We compute degree, weighted degree, and connected components to characterize collaboration patterns.
+\subsection{Dise\~no}
+El diseño del sistema se estructura en torno a varios ejes:
 
-\subsection{Career Participation}
-A table summarizes counts and proportions by career and year, enabling comparisons across programs and cohorts.
+\paragraph{Modelo de datos.}
+Se definió un modelo relacional que representa explícitamente las relaciones entre proyectos, directores, co-directores, estudiantes, carreras y dominios de aplicación. Se utilizan identificadores enteros para las claves primarias internas y UUIDs para la exposición externa de entidades, favoreciendo la estabilidad y la seguridad de las referencias.
 
-\subsection{Operational Outcomes}
-We summarize deployment status, health checks, email pipeline (magic links), import/backup behavior, and any reliability incidents observed during evaluation.
+\paragraph{Servicios de negocio.}
+La lógica central del sistema se encapsula en servicios que abstraen el acceso a la base de datos y coordinan operaciones complejas (por ejemplo, importación de lotes de proyectos, generación de vistas agregadas para analíticas y gestión de respaldos).
 
-% --- 5. Discussion ---
-\section{Discussion}\label{sec:discussion}
-\subsection{Impact Versus Objectives}
-We map the delivered modules and features to the initial objectives, discussing benefits for administration, professors, and the public community. We describe observed improvements in transparency and decision support.
+\paragraph{Interfaz de usuario.}
+El frontend aprovecha componentes reutilizables (tablas, formularios, filtros) y librerías de visualización para construir:
 
-\subsection{Limitations}
-Current analytics rely on in-memory computation; with larger datasets, DB-level aggregations or a caching layer would be beneficial. Authorization checks are service-level; finer-grained policies could be explored. Testing coverage is improving but not yet comprehensive.
+\begin{itemize}
+  \item Tablas de administración con búsqueda, filtrado y paginación.
+  \item Vistas específicas para profesores, listando sólo los proyectos asociados a cada uno.
+  \item Dashboards públicos que muestran líneas de tiempo, mapas de calor temáticos, redes de colaboración entre docentes y estadísticas por carrera.
+\end{itemize}
 
-\subsection{Threats to Validity}
-We discuss data completeness (historical gaps), measurement biases (tagging practices), and interface learnability for new users.
+[TODO: Incluir diagramas de clases, diagramas ER y capturas de pantalla de las interfaces.]
 
-% --- 6. Conclusions and Future Work ---
-\section{Conclusions and Future Work}\label{sec:conclusions}
-ThesisFlow demonstrates that a department-owned platform can unify academic project management and analytics, offering immediate value with modest operational complexity. Future work prioritizes (i) pushing aggregations into the database and adding caching; (ii) enhancing authorization granularity and auditability; (iii) extending public APIs and export/reporting; and (iv) integrating with institutional services to improve data freshness and coverage.
+\subsection{Comparaci\'on con objetivos}
+En términos generales, la implementación alcanzada se alinea con los objetivos planteados:
 
-% --- Acknowledgments ---
-\subsubsection*{Acknowledgments}
-We thank the DCIC administrative staff and professors for their feedback and time during requirements elicitation and acceptance.
+\begin{itemize}
+  \item Se logró centralizar la información de Trabajos Finales y Tesis en una única plataforma.
+  \item Se desarrollaron interfaces diferenciadas para administración, docentes y público.
+  \item Se incorporaron visualizaciones interactivas que permiten explorar la producción académica desde distintas perspectivas.
+\end{itemize}
 
-% --- Bibliography ---
-% Use BibLaTeX or LNCS \bibliographystyle as required by your venue.
+No obstante, aún existen aspectos susceptibles de mejora, particularmente en lo relativo a la optimización de consultas analíticas, la cobertura total del histórico de datos y la incorporación de nuevos perfiles de usuario (por ejemplo, estudiantes).
+
+[TODO: Completar con referencias explícitas a resultados medibles u observaciones de uso.]
+
+% --- 6. Usos de la app ---
+\section{Usos de la app}
+La plataforma \emph{ThesisFlow} se utiliza en distintos escenarios por diferentes tipos de usuarios:
+
+\begin{itemize}
+  \item \textbf{Secretaría/Administración}: para cargar nuevos proyectos aprobados, actualizar información y generar listados.
+  \item \textbf{Profesores}: para consultar y gestionar los trabajos en los que participan como directores o co-directores.
+  \item \textbf{Público general}: para explorar la producción del DCIC mediante visualizaciones y filtros.
+\end{itemize}
+
+\subsection{Ejemplo X}
+[TODO: Describir un caso de uso concreto, por ejemplo:
+(i) el flujo completo de carga de un nuevo proyecto aprobado por el consejo;
+(ii) el análisis que realiza un profesor sobre su historial de dirección;
+o (iii) la exploración de temas emergentes por parte de un responsable académico.]
+
+% --- 7. Conclusiones ---
+\section{Conclusiones}
+El desarrollo de \emph{ThesisFlow} permitió dotar al DCIC de una herramienta específica para la gestión y visualización de Trabajos Finales y Tesis de Grado. La plataforma contribuye a:
+
+\begin{itemize}
+  \item reducir la fragmentación de la información y los procesos manuales;
+  \item mejorar la accesibilidad y la transparencia de los datos académicos;
+  \item habilitar nuevas formas de análisis sobre la producción del departamento.
+\end{itemize}
+
+Desde el punto de vista de ingeniería de software, el sistema constituye un caso de estudio de diseño e implementación de una aplicación web modular, con énfasis en la separación de responsabilidades, el uso de APIs REST y la integración de componentes de visualización de datos en un contexto académico real.
+
+[TODO: Añadir conclusiones adicionales basadas en la experiencia de despliegue y uso real.]
+
+% --- 8. Trabajo a futuro ---
+\section{Trabajo a futuro}
+Entre las posibles líneas de trabajo futuro se destacan:
+
+\begin{itemize}
+  \item Integrar la plataforma con otros sistemas de la Universidad (por ejemplo, sistemas de gestión académica o repositorios institucionales).
+  \item Extender las funcionalidades para incluir vistas específicas para estudiantes (seguimiento del propio Trabajo Final, hitos, entrega de documentación).
+  \item Optimizar el motor de analíticas, explorando consultas agregadas en base de datos, vistas materializadas o mecanismos de caché.
+  \item Incorporar generación automática de reportes y estadísticas periódicas para la gestión del departamento.
+  \item Mejorar el soporte para auditoría y trazabilidad (historial de cambios, registro de acciones de usuario).
+\end{itemize}
+
+[TODO: Priorizar estas líneas en función de los recursos disponibles y de la planificación institucional.]
+
+% --- Bibliografía ---
 \bibliographystyle{splncs04}
 \bibliography{references}
 
-% --- Appendix (optional) ---
-\appendix
-\section{Appendix: Screenshots and Diagrams (Optional)}
-Include here UI screenshots (admin console, analytics views) and architecture/ER/UML diagrams as figures. Ensure high-resolution images and captions.
-
 \end{document}
-
