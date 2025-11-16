@@ -259,6 +259,40 @@ En el entorno actual, el frontend de \emph{ThesisFlow} se despliega en Vercel, q
 
 Como línea de mejora, se considera deseable que a futuro la plataforma sea alojada en la infraestructura del propio DCIC, bajo un dominio institucional del tipo \texttt{*.cs.uns.edu.ar}, de modo de consolidar el control operativo, la soberanía de los datos y la integración con otros servicios de la Universidad.
 
+\subsection{Carga inicial de datos}
+
+La carga inicial de datos constituyó una etapa fundamental para poner en funcionamiento la plataforma con un conjunto completo y confiable de Trabajos Finales históricos. El proceso se estructuró en tres fases principales: normalización del dataset original, preparación estructurada de los archivos y carga mediante la funcionalidad de importación masiva del sistema.
+
+\paragraph{Normalización y limpieza del dataset.}
+El punto de partida fue un conjunto heterogéneo de fuentes: planillas históricas, documentos administrativos y actas del Consejo Departamental. Estos datos presentaban variaciones en nombres de docentes, formatos de fechas, diferencias tipográficas y estructuras inconsistentes.  
+Para unificar estos registros, se desarrolló un script específico (documentado en el repositorio del proyecto) que:
+
+\begin{itemize}
+  \item estandarizó nombres de docentes y estudiantes mediante reglas de coincidencia aproximada y diccionarios de equivalencias;
+  \item unificó formatos de fechas (aprobación, defensa, publicación);
+  \item asignó carreras y dominios respetando taxonomías actuales del DCIC;
+  \item detectó y resolvió duplicados mediante heurísticas basadas en título + año + docente;
+  \item generó UUIDs estables para cada proyecto y persona.
+\end{itemize}
+
+Este proceso garantizó un dataset coherente y apto para ser cargado en un modelo relacional.
+
+\paragraph{Preparación del archivo de importación.}
+Una vez normalizado el dataset, el script generó un archivo CSV con columnas alineadas al modelo de datos interno: proyecto, fechas, docentes, carrera, etiquetas temáticas y dominios.  
+El sistema comprueba automáticamente la validez del archivo, la consistencia de las columnas y el tipo de datos antes de continuar.
+
+\paragraph{Importación masiva en la plataforma.}
+Finalmente, la carga se realizó utilizando la funcionalidad de “Importar proyectos”, que:
+
+\begin{itemize}
+  \item procesa cada fila como una operación atómica (validación → creación del proyecto → creación de relaciones);
+  \item informa errores fila por fila sin detener el proceso completo;
+  \item genera un reporte detallado con estadísticas (creados, actualizados, rechazados);
+  \item asegura que las entidades relacionadas (docentes, etiquetas, dominios) se creen o reutilicen según corresponda.
+\end{itemize}
+
+Gracias a este proceso, el sistema quedó poblado con la totalidad del historial disponible, permitiendo que las visualizaciones y analíticas fueran significativas desde el primer despliegue.
+
 \subsection{Flujo de creación de proyectos}
 
 El flujo de creación de un proyecto refleja el proceso que sigue la secretaría para registrar un Trabajo Final aprobado. La Figura~\ref{fig:sequence} muestra un diagrama de secuencia simplificado.
