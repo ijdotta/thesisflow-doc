@@ -25,7 +25,7 @@
 Universidad Nacional del Sur, Argentina\\
 Directores: Dr. Martín Larrea y Dra. María Luján Ganuza\\
 Codirector: Lic. Diego Sebastian Orbe Leiva\\
-\email{ij.dotta@gmail.com}}
+\email{\{ignacio.dotta, mlg, mll, diego.orbe\}@cs.uns.edu.ar}}
 
 \begin{document}
 \maketitle
@@ -48,7 +48,7 @@ La gestión de Trabajos Finales y Tesis de Grado en el Departamento de Ciencias 
   \item la transparencia institucional respecto de la producción del departamento.
 \end{itemize}
 
-\subsection*{Estado de la cuestión}
+\subsection*{Estado del arte}
 
 Tradicionalmente, al preparar la producción académica anual se revisan manualmente las actas aprobadas durante el período correspondiente, obteniendo principalmente conteos agregados de Trabajos Finales. En años recientes se comenzó a recopilar información más detallada (título, fechas, docentes, temática, alumnos), pero sin un sistema que permita explotarla de manera estructurada ni ofrecer vistas unificadas a los distintos actores.
 
@@ -206,6 +206,52 @@ El backend expone endpoints REST para operaciones administrativas, vistas públi
 El modelo de datos incluye entidades como \texttt{Project}, \texttt{Person}, \texttt{Career}, \texttt{Domain} y \texttt{Tag}, junto con tablas de unión para representar relaciones muchos-a-muchos (por ejemplo, proyectos–docentes y proyectos–etiquetas). Internamente se utilizan claves enteras, mientras que hacia el exterior se exponen UUIDs para preservar estabilidad y privacidad en los identificadores.
 
 Los servicios de negocio abstraen el acceso a datos y coordinan operaciones que involucran múltiples entidades, tales como la creación de un nuevo proyecto con sus relaciones, la importación de lotes desde archivos CSV o la construcción de agregados para analíticas.
+
+\subsection{Decisiones de diseño y proceso de desarrollo}
+
+El desarrollo de \emph{ThesisFlow} involucró una serie de decisiones arquitectónicas y metodológicas que respondieron tanto a los requisitos funcionales como a las necesidades operativas del DCIC. A continuación se detallan algunos de los aspectos más relevantes.
+
+\paragraph{a) Flujo de autenticación mediante \emph{magic links}.}
+Para facilitar el acceso de los docentes sin requerir usuarios y contraseñas tradicionales, se implementó un mecanismo de acceso basado en \emph{magic links}. El flujo consiste en:
+\begin{itemize}
+  \item El profesor solicita acceso proporcionando su correo institucional.
+  \item El sistema genera un enlace único asociado a un token efímero (no JWT) y lo envía al correo correspondiente. Este correo debe coincidir con el registrado previamente por secretaría al cargar proyectos dirigidos por ese docente.
+  \item Al acceder desde el enlace, el backend valida el token y emite un JWT estándar, que el frontend utiliza para autenticar las sesiones posteriores del docente.
+\end{itemize}
+Este mecanismo evita la gestión de contraseñas, reduce fricción para los usuarios y mantiene un esquema seguro basado en la posesión del correo institucional.
+
+\paragraph{b) Elección de un modelo estructurado en SQL.}
+Aunquue la estructura jerárquica de un Trabajo Final podría modelarse en una base NoSQL, se optó por PostgreSQL debido a:
+\begin{itemize}
+  \item la necesidad de garantizar consistencia y normalización de datos;
+  \item la presencia de relaciones complejas entre entidades (proyectos, docentes, estudiantes, carreras, etiquetas);
+  \item la importancia de realizar estadísticas precisas, agregaciones y filtros sobre datos altamente estructurados.
+\end{itemize}
+Un modelo NoSQL hubiera simplificado algunos aspectos del dominio, pero hubiera dificultado mantener consistencia cuando cambian datos compartidos, como la información de un docente asociado a múltiples proyectos.
+
+\paragraph{c) Proceso de desarrollo.}
+El desarrollo se organizó en etapas sucesivas:
+\begin{itemize}
+  \item Reuniones iniciales para análisis de requerimientos y definición del alcance general.
+  \item Elaboración de un documento PRD (\emph{Product Requirements Document}) con requerimientos funcionales detallados.
+  \item Priorización en tres hitos principales:
+  \begin{enumerate}
+    \item Modelo de datos, CRUDs administrativos y autenticación de secretaría.
+    \item Acceso público, visualizaciones interactivas y motor de analíticas.
+    \item Funcionalidades específicas para docentes, incluyendo vistas personalizadas y \emph{magic links}.
+  \end{enumerate}
+  \item Creación de prototipos de interfaz en Figma para validar flujos y orientar el diseño visual.
+  \item Diseño del modelo entidad–relación (ER) y transición a la implementación incremental.
+\end{itemize}
+
+\paragraph{d) Uso experimental de herramientas de inteligencia artificial.}
+Durante el desarrollo se integraron herramientas de IA generativa (Claude Haiku 4.5 y Codex/ChatGPT 5.0) para acelerar tareas repetitivas. Se observó:
+\begin{itemize}
+  \item Alta utilidad en generación de componentes de frontend, CRUDs, pruebas automáticas y depuración de errores típicos de librerías.
+  \item Utilidad moderada en tareas de refactorización o generación de código boilerplate.
+  \item Limitaciones marcadas en tareas complejas como diseño del servicio de analíticas, donde la IA tendió a producir errores conceptuales o resultados inconsistentes.
+\end{itemize}
+En conclusión, la IA se demostró altamente eficaz para acelerar un proyecto de escala media cuando se aplica a tareas bien definidas y supervisadas, reduciendo significativamente tiempos de desarrollo.
 
 \subsection{Despliegue e infraestructura}
 
