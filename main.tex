@@ -191,6 +191,15 @@ Finalmente, la carga se realizó utilizando la funcionalidad de “Importar proy
 Gracias a este proceso, el sistema quedó poblado con la totalidad del historial disponible, permitiendo que las visualizaciones y analíticas fueran significativas desde el primer despliegue.
 
 
+
+% --- 6. Usos de la app ---
+\section{Usos de la aplicación}
+
+\emph{ThesisFlow} se utiliza en distintos escenarios por actores con necesidades diversas. Desde la secretaría, la plataforma funciona como herramienta central para registrar proyectos finales o tesis aprobados, actualizar metadatos y generar listados consolidados. Los docentes la emplean para consultar los proyectos en los que participan como directores o co-directores y verificar la información publicada sobre su actividad de dirección. Finalmente, el público general puede explorar la producción del departamento mediante filtros y visualizaciones interactivas que ponen en contexto la trayectoria académica del DCIC.
+
+
+Las Figuras~\ref{fig:admin-screenshot} y \ref{fig:public-browse} ilustran, respectivamente, la vista de creación de proyectos en el módulo de administración y el catálogo público básico de proyectos. A partir de estas vistas, la aplicación articula flujos específicos para cada tipo de usuario. En las subsecciones siguientes se describen ejemplos concretos, integrando capturas adicionales que muestran la exploración de proyectos y las analíticas disponibles.
+
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\linewidth]{project-created-admin-view.png}
@@ -205,21 +214,9 @@ Gracias a este proceso, el sistema quedó poblado con la totalidad del historial
 \label{fig:public-browse}
 \end{figure}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.9\linewidth]{analytics-network-public-view.png}
-\caption{Visualización de la red de colaboración entre docentes.}
-\label{fig:network-view}
-\end{figure}
-
-% --- 6. Usos de la app ---
- \section{Usos de la aplicación}
-
-\emph{ThesisFlow} se utiliza en distintos escenarios por actores con necesidades diversas. Desde la secretaría, la plataforma funciona como herramienta central para registrar proyectos finales o tesis aprobados, actualizar metadatos y generar listados consolidados. Los docentes la emplean para consultar los proyectos en los que participan como directores o co-directores y verificar la información publicada sobre su actividad de dirección. Finalmente, el público general puede explorar la producción del departamento mediante filtros y visualizaciones interactivas que ponen en contexto la trayectoria académica del DCIC.
-
 \subsection*{Ejemplo de uso por secretaría}
 
-Un caso típico de uso por parte de la secretaría se da cuando el Consejo Departamental aprueba un nuevo proyecto final o tesis. El personal administrativo inicia sesión en el módulo de administración y accede al panel principal, desde donde puede navegar al catálogo de proyectos. Allí inicia el asistente de creación de proyecto, que guía el ingreso de la información básica: título, tipo de trabajo, carrera, resumen y fechas relevantes. En una segunda etapa del asistente se seleccionan los directores y co-directores a partir del catálogo de docentes ya cargado en el sistema, mientras que en una tercera etapa se incorporan los estudiantes involucrados, ya sea seleccionándolos del listado existente o ingresándolos manualmente según la información disponible.
+Un caso típico de uso por parte de la secretaría se da cuando el Consejo Departamental aprueba un nuevo proyecto final o tesis. El personal administrativo inicia sesión en el módulo de administración y accede al panel principal, desde donde puede navegar al catálogo de proyectos. Allí inicia el asistente de creación de proyecto (Figura~\ref{fig:admin-screenshot}), que guía el ingreso de la información básica: título, tipo de trabajo, carrera, resumen y fechas relevantes. En una segunda etapa del asistente se seleccionan los directores y co-directores a partir del catálogo de docentes ya cargado en el sistema, mientras que en una tercera etapa se incorporan los estudiantes involucrados, ya sea seleccionándolos del listado existente o ingresándolos manualmente según la información disponible.
 
 Al confirmar la operación, el sistema valida los datos, crea el nuevo registro de proyecto y establece las relaciones con docentes, estudiantes, carrera y dominios de aplicación. De este modo, el proyecto queda inmediatamente incorporado al registro histórico, disponible tanto para las visualizaciones públicas como para las consultas internas. Cuando se trata de actualizar grandes volúmenes de información (por ejemplo, al incorporar varios años de proyectos históricos), la secretaría puede utilizar en cambio la funcionalidad de importación masiva a partir de archivos CSV normalizados, lo que reduce errores y agiliza la carga inicial o las actualizaciones periódicas.
 
@@ -229,11 +226,52 @@ Desde la perspectiva de los docentes, la plataforma ofrece un punto de acceso un
 
 Una vez en el panel, el docente visualiza un listado de proyectos filtrando automáticamente en los que participa. Desde allí puede acceder al detalle de cada proyecto para revisar el título, la descripción, los estudiantes asociados, la carrera, el dominio de aplicación y las etiquetas temáticas. Cuando un proyecto ha concluido, el docente puede completar o ajustar los metadatos finales, incorporando la fecha de finalización, palabras clave adicionales y la selección definitiva de etiquetas y dominios. En aquellos casos en que la política institucional lo permita, también puede asociar un enlace o recurso con la memoria del trabajo. Además, el docente cuenta con vistas de analíticas que reutilizan los mismos datos públicos, pero filtradas por su propia actividad de dirección, lo que le permite seguir la evolución de sus líneas de trabajo a lo largo del tiempo.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{docente-dashboard-view.png}
+\caption{Vista del panel de docente con la barra lateral de navegación y la opción de exportar los proyectos dirigidos.}
+\label{fig:docente-dashboard}
+\end{figure}
+
+La Figura~\ref{fig:docente-dashboard} muestra un ejemplo del panel de docente, donde se aprecia la barra lateral con las distintas secciones disponibles (proyectos, analíticas, configuración, entre otras) y, en el área principal, la funcionalidad de exportar los proyectos en los que participa el docente. Este tipo de vista sintetiza las operaciones más frecuentes del perfil docente en torno a la consulta y reutilización de la información de sus proyectos.
+
 \subsection*{Ejemplo de uso por estudiantes}
 
-Un estudiante próximo a iniciar su proyecto final o tesis accede a la sección pública de \emph{ThesisFlow} sin necesidad de autenticación. Desde la vista de catálogo puede navegar por un listado paginado de proyectos históricos y aplicar filtros por carrera, dominio de aplicación, etiquetas temáticas, docentes o año de finalización. Esta combinación de filtros le permite acotar rápidamente el conjunto de proyectos a aquellos que se aproximan a sus intereses, por ejemplo, trabajos recientes de su carrera en temas de sistemas distribuidos o aprendizaje automático.
+Un estudiante próximo a iniciar su proyecto final o tesis accede a la sección pública de \emph{ThesisFlow} sin necesidad de autenticación. Desde la vista de catálogo (Figura~\ref{fig:public-browse}) puede navegar por un listado paginado de proyectos históricos y aplicar filtros por carrera, dominio de aplicación, etiquetas temáticas, docentes o año de finalización. Esta combinación de filtros le permite acotar rápidamente el conjunto de proyectos a aquellos que se aproximan a sus intereses, por ejemplo, trabajos recientes de su carrera en temas de sistemas distribuidos o aprendizaje automático.
 
-Al seleccionar un proyecto en el catálogo, el sistema muestra una vista detallada con el título, la descripción, los docentes responsables, la carrera, el dominio y las etiquetas temáticas asociadas. A partir de esta información, el estudiante puede identificar patrones sobre el tipo de problemas abordados, el nivel de complejidad esperado y los recursos típicos empleados. Complementariamente, el estudiante puede recorrer el portal de analíticas públicas, que incluye líneas de tiempo, mapas de calor de temas y redes de colaboración entre docentes, para comprender mejor cómo se distribuyen los proyectos por año, tópico y dirección. En conjunto, estas vistas sirven como insumo para formular una propuesta propia más informada y ubicar potenciales directores afines a sus intereses.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{project-filters-public-view.png}
+\caption{Exploración del catálogo público utilizando filtros por carrera, etiquetas temáticas y docentes.}
+\label{fig:public-filters}
+\end{figure}
+
+En la Figura~\ref{fig:public-filters} se observa un caso de uso típico en el que el estudiante combina filtros de carrera, etiquetas y docentes para explorar proyectos afines a un área determinada. Al seleccionar un proyecto en el catálogo, el sistema muestra una vista detallada con el título, la descripción, los docentes responsables, la carrera, el dominio y las etiquetas temáticas asociadas. A partir de esta información, el estudiante puede identificar patrones sobre el tipo de problemas abordados, el nivel de complejidad esperado y los recursos típicos empleados.
+
+Complementariamente, el estudiante puede recorrer el portal de analíticas públicas, que incluye líneas de tiempo, mapas de calor de temas y redes de colaboración entre docentes. La Figura~\ref{fig:network-view} ilustra una de estas visualizaciones, centrada en la red de co-dirección entre docentes, mientras que las Figuras~\ref{fig:analytics-heatmap} y \ref{fig:analytics-timeline} muestran ejemplos de analíticas agregadas sobre temas y períodos.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\linewidth]{analytics-network-public-view.png}
+\caption{Visualización de la red de colaboración entre docentes.}
+\label{fig:network-view}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\linewidth]{analytics-heatmap-public-view.png}
+\caption{Mapa de calor de temas y carreras, utilizado para analizar la distribución de proyectos por área de aplicación.}
+\label{fig:analytics-heatmap}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\linewidth]{analytics-timeline-public-view.png}
+\caption{Línea de tiempo de proyectos, que permite observar tendencias y volúmenes por año y temática.}
+\label{fig:analytics-timeline}
+\end{figure}
+
+En conjunto, estas vistas sirven como insumo para formular una propuesta propia más informada y ubicar potenciales directores afines a los intereses del estudiante, a la vez que brindan a la comunidad académica una panorámica de la producción del departamento desde múltiples perspectivas.
 
 % --- 7. Conclusiones ---
 % --- 7. Conclusiones y trabajo futuro ---
@@ -247,6 +285,8 @@ En cuanto al trabajo futuro, se identifican varias líneas de evolución. En el 
 
 
 Desde el punto de vista funcional, una línea de desarrollo interesante es permitir que los propios alumnos suban recursos asociados a sus trabajos (código, datasets, documentación complementaria), así como mejorar el soporte de almacenamiento de archivos dentro del sistema. Esto reduciría la dependencia de enlaces externos y favorecería la preservación a largo plazo del material asociado a cada proyecto. Finalmente, la incorporación de estrategias de respaldo automático y procedimientos simplificados de restauración contribuirá a robustecer el sistema como componente permanente de la infraestructura académica del DCIC.
+
+\clearpage
 
 \subsubsection*{Agradecimientos}
 Agradezco especialmente a mis directores, Dr. Martín Larrea y Dra. María Luján Ganuza, y a mi codirector, Lic. Diego Sebastián Orbe Leiva, por su guía, dedicación y acompañamiento durante el desarrollo de este trabajo. Su orientación académica y técnica fue fundamental para la concreción de este proyecto.
