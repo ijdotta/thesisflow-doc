@@ -225,18 +225,32 @@ El flujo de creación de un proyecto refleja el proceso que sigue la secretaría
 \draw[flow] ($(fe.south)+(0,-5.4)$) -- node[above]{6. Confirmación visual} ($(admin.south)+(0,-5.4)$);
 
 \end{tikzpicture}
-
- \caption{Flujo simplificado de creación de un proyecto en \emph{ThesisFlow}.}
- \label{fig:sequence}
+\caption{Flujo simplificado de creación de un proyecto en \emph{ThesisFlow}.}
+\label{fig:sequence}
 \end{figure}
 
 Este flujo asegura que los datos ingresados se validen en el backend, que se creen las relaciones necesarias en la base de datos y que el nuevo proyecto quede disponible inmediatamente para las interfaces de consulta y analíticas.
 
+
 \begin{figure}[h]
 \centering
-\fbox{\parbox{0.8\linewidth}{Espacio reservado para una captura de pantalla del panel de administración de proyectos en \emph{ThesisFlow}.}}
-\caption{Vista de administración de proyectos (captura de pantalla a incorporar).}
+\includegraphics[width=0.85\linewidth]{project-created-admin-view.png}
+\caption{Vista de creación de proyectos en el módulo de administración.}
 \label{fig:admin-screenshot}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\linewidth]{project-browse-public-view.png}
+\caption{Vista pública del catálogo de proyectos.}
+\label{fig:public-browse}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\linewidth]{analytics-network-public-view.png}
+\caption{Visualización de la red de colaboración entre docentes.}
+\label{fig:network-view}
 \end{figure}
 
 % --- 6. Usos de la app ---
